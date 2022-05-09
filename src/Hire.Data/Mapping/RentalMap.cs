@@ -4,13 +4,19 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Hire.Data.Mapping
 {
-    public class RentalMap : HireEntityTypeConfiguration<Rental>
+    public class RentalMap : HireEntityTypeConfiguration<RentalEntity>
     {
-        public override void Configure(EntityTypeBuilder<Rental> builder)
+        public override void Configure(EntityTypeBuilder<RentalEntity> builder)
         {
-            builder.ToTable(nameof(Rental));
+            builder.ToTable("Rental");
 
             builder.HasKey(a => a.Id);
+
+            builder
+                .HasDiscriminator<RentalType>("RentalType")
+                .HasValue(typeof(VehicleEntity), RentalType.Vehicle);
+
+            builder.HasIndex("RentalType");
 
             base.Configure(builder);
         }

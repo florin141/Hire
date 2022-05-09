@@ -1,13 +1,23 @@
 using System;
+using AutoMapper;
 using Hire.Core.Data;
 using Hire.Data;
 using Hire.Services.Converter;
+using Hire.Services.Models;
+using Hire.Services.Orders;
+using Hire.Services.Rentals;
+using Hire.WebApi.Filters;
+using Hire.WebApi.Infrastructure;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Versioning;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Hire.WebApi
 {
@@ -23,7 +33,61 @@ namespace Hire.WebApi
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllers();
+            services.AddControllers()
+                .AddJsonOptions(options =>
+                {
+                    options.JsonSerializerOptions.IgnoreNullValues = true;
+                })
+                .AddNewtonsoftJson(options =>
+                {
+                    options.SerializerSettings.NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore;
+                });
+
+            services.Configure<PagingOptions>(
+                Configuration.GetSection("DefaultPagingOptions"));
+
+            services.AddAuthentication(options =>
+                {
+                    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                })
+                .AddJwtBearer(options =>
+                {
+                    options.Authority = "https://localhost:5001";
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateAudience = false
+                    };
+                });
+
+            services.AddMvc(options =>
+            {
+                options.Filters.Add<RequireHttpsOrCloseAttribute>();
+                options.Filters.Add<LinkRewritingFilter>();
+            });
+
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy("ApiScopePolicy", policy =>
+                {
+                    policy.RequireAuthenticatedUser();
+                    policy.RequireClaim("scope", "hire_api");
+                });
+            });
+
+            services.AddRouting(options => options.LowercaseUrls = true);
+
+            services.AddApiVersioning(options =>
+            {
+                options.DefaultApiVersion = new ApiVersion(1, 0);
+                options.ApiVersionReader = new MediaTypeApiVersionReader();
+                options.AssumeDefaultVersionWhenUnspecified = true;
+                options.ReportApiVersions = true;
+                options.ApiVersionSelector = new CurrentImplementationApiVersionSelector(options);
+            });
+
+            services.AddAutoMapper(
+                options => options.AddProfile<MappingProfile>());
 
             RegisterRepositories(services);
             RegisterServices(services);
@@ -32,6 +96,8 @@ namespace Hire.WebApi
         private void RegisterServices(IServiceCollection services)
         {
             services.AddScoped<ICurrencyConverter, CurrencyConverter>();
+            services.AddScoped<IVehicleService, VehicleService>();
+            services.AddScoped<IOrderService, OrderService>();
         }
 
         private void RegisterRepositories(IServiceCollection services)
@@ -65,11 +131,14 @@ namespace Hire.WebApi
 
             app.UseRouting();
 
+            app.UseAuthentication();
+
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapControllers();
+                endpoints.MapControllers()
+                    .RequireAuthorization("ApiScopePolicy");
             });
         }
     }

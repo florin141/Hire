@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using Hire.Core.Domain.Customers;
+using Hire.Core.Domain.Rentals;
 using Hire.Data.Mapping;
 using Microsoft.EntityFrameworkCore;
 
@@ -15,22 +15,73 @@ namespace Hire.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.ApplyConfiguration(new CustomerMap());
             modelBuilder.ApplyConfiguration(new OrderItemMap());
             modelBuilder.ApplyConfiguration(new OrderMap());
             modelBuilder.ApplyConfiguration(new RentalMap());
-            modelBuilder.ApplyConfiguration(new VehicleMap());
             modelBuilder.ApplyConfiguration(new RentalStateMap());
-            modelBuilder.ApplyConfiguration(new VehicleStateMap());
 
-            modelBuilder.Entity<Customer>().HasData(new List<Customer>
+            modelBuilder.Entity<VehicleEntity>().HasData(new List<VehicleEntity>
             {
-                new Customer
+                new VehicleEntity
                 {
                     Id = 1,
-                    Name = "Florin CIOBANU",
-                    Phone = "+34643447860"
-                }
+                    Vin = "JH4DC2380SS000011",
+                    Odometer = 100100,
+                    Make = "Chevrolet",
+                    Model = "Epica",
+                    Year = 2007,
+                    Type = VehicleType.Sedans
+                },
+                new VehicleEntity
+                {
+                    Id = 2,
+                    Vin = "JH4DC2380SS000012",
+                    Odometer = 200200,
+                    Make = "BMW",
+                    Model = "316i",
+                    Year = 2003,
+                    Type = VehicleType.Sedans,
+                },
+                new VehicleEntity
+                {
+                    Id = 3,
+                    Vin = "TS4DC2380SS000013",
+                    Odometer = 90100,
+                    Make = "Honda",
+                    Model = "Odyssey",
+                    Year = 2022,
+                    Type = VehicleType.Minivans,
+                },
+                new VehicleEntity
+                {
+                    Id = 4,
+                    Vin = "TS4DC2380SS000013",
+                    Odometer = 90200,
+                    Make = "Chrysler",
+                    Model = "Pacifica",
+                    Year = 2022,
+                    Type = VehicleType.Minivans,
+                },
+                new VehicleEntity
+                {
+                    Id = 5,
+                    Vin = "JH4DC2380SS000014",
+                    Odometer = 200100,
+                    Make = "Chevrolet",
+                    Model = "Colorado",
+                    Year = 2022,
+                    Type = VehicleType.Trucks,
+                },
+                new VehicleEntity
+                {
+                    Id = 6,
+                    Vin = "FD4DC2380SS000015",
+                    Odometer = 200100,
+                    Make = "Ford",
+                    Model = "Maverick",
+                    Year = 2022,
+                    Type = VehicleType.Trucks,
+                },
             });
 
             base.OnModelCreating(modelBuilder);
