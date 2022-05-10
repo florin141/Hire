@@ -1,0 +1,467 @@
+{
+	"info": {
+		"_postman_id": "c6328c46-59f6-40e6-8acb-08ec9281d772",
+		"name": "Hire RESTful API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "IDP",
+			"item": [
+				{
+					"name": "openid-configuration",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{IDP_URL}}/.well-known/openid-configuration",
+							"host": [
+								"{{IDP_URL}}"
+							],
+							"path": [
+								".well-known",
+								"openid-configuration"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "oauth2",
+							"oauth2": [
+								{
+									"key": "grant_type",
+									"value": "authorization_code_with_pkce",
+									"type": "string"
+								},
+								{
+									"key": "addTokenTo",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "client_id",
+									"value": "{{client_id}}",
+									"type": "text"
+								},
+								{
+									"key": "client_secret",
+									"value": "{{client_secret}}",
+									"type": "text"
+								},
+								{
+									"key": "scope",
+									"value": "{{scope}}",
+									"type": "text"
+								},
+								{
+									"key": "grant_type",
+									"value": "{{grant_type}}",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{IDP_URL}}/connect/token",
+							"host": [
+								"{{IDP_URL}}"
+							],
+							"path": [
+								"connect",
+								"token"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "auth0 token",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"client_id\": \"AJFWKjDLmlH1GhzP7PoqbqRzIzoJxiqi\",\r\n\t\"client_secret\": \"5GL79wtMNBae0iFiUr4fz3Z7URC1zaBsRmF2fm5AdpZz9FWL9wAfrszHX_DvpnvX\",\r\n\t\"audience\": \"https://localhost:44336\",\r\n\t\"grant_type\": \"client_credentials\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://dev141.auth0.com/oauth/token",
+							"protocol": "https",
+							"host": [
+								"dev141",
+								"auth0",
+								"com"
+							],
+							"path": [
+								"oauth",
+								"token"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "API",
+			"item": [
+				{
+					"name": "Vehicles",
+					"item": [
+						{
+							"name": "Get all vehicles",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{URL}}/vehicles",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"vehicles"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Lease a vehicle",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"startAt\": \"2022-05-09T08:30:00Z\",\r\n    \"endAt\": \"2022-05-10T08:30:00Z\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{URL}}/vehicles/:orderId/:rentalId/lease",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"vehicles",
+										":orderId",
+										":rentalId",
+										"lease"
+									],
+									"variable": [
+										{
+											"key": "orderId",
+											"value": "12"
+										},
+										{
+											"key": "rentalId",
+											"value": "3"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Return leased vehicle",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"isTankFull\": false,\r\n    \"odometer\": 250000\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{URL}}/vehicles/:orderId/:rentalId/release",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"vehicles",
+										":orderId",
+										":rentalId",
+										"release"
+									],
+									"variable": [
+										{
+											"key": "orderId",
+											"value": "12"
+										},
+										{
+											"key": "rentalId",
+											"value": "3"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Orders",
+					"item": [
+						{
+							"name": "Get all orders",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{URL}}/orders",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"orders"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get all orders for user",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{URL}}/orders/:userId/all",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"orders",
+										":userId",
+										"all"
+									],
+									"variable": [
+										{
+											"key": "userId",
+											"value": "1001"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Begin order for user",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"url": {
+									"raw": "{{URL}}/orders/:userId/init",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"orders",
+										":userId",
+										"init"
+									],
+									"variable": [
+										{
+											"key": "userId",
+											"value": "1001"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Complete order",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"url": {
+									"raw": "{{URL}}/orders/:orderId/complete",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"orders",
+										":orderId",
+										"complete"
+									],
+									"variable": [
+										{
+											"key": "orderId",
+											"value": "11"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get order",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{URL}}/orders/:orderId",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"orders",
+										":orderId"
+									],
+									"variable": [
+										{
+											"key": "orderId",
+											"value": "2"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "GET root",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{URL}}",
+							"host": [
+								"{{URL}}"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"var expires_at = pm.environment.get(\"expires_at\");",
+							"var now = new Date();",
+							"",
+							"if (!expires_at || new Date(expires_at) < now) {",
+							"    pm.sendRequest({",
+							"      url: \"https://localhost:5001/connect/token\", ",
+							"      method: 'POST',",
+							"      header: {",
+							"        'Accept': 'application/json',",
+							"        'Content-Type': 'application/x-www-form-urlencoded'",
+							"      },",
+							"      body: {",
+							"          mode: 'urlencoded',",
+							"          urlencoded: [",
+							"            {key: \"grant_type\", value: pm.environment.get(\"grant_type\"), disabled: false},",
+							"            {key: \"client_id\", value: pm.environment.get(\"client_id\"), disabled: false},",
+							"            {key: \"scope\", value: pm.environment.get(\"scope\"), disabled: false},",
+							"            {key: \"client_secret\", value: pm.environment.get(\"client_secret\"), disabled: false}",
+							"        ]",
+							"      }",
+							"  }, function (err, res) {",
+							"      var json = res.json();",
+							"      pm.environment.set(\"access_token\", json.access_token);",
+							"      now.setSeconds(now.getSeconds() + json.expires_in);",
+							"      pm.environment.set(\"expires_at\", now);",
+							"  });",
+							"}"
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{access_token}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	]
+}
