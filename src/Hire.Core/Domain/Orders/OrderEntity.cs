@@ -10,24 +10,21 @@ namespace Hire.Core.Domain.Orders
         public int UserId { get; set; }
 
         /// <summary>
-        /// Gets or sets the VAT number (the European Union Value Added Tax)
-        /// </summary>
-        public string VatNumber { get; set; }
-
-        /// <summary>
         /// Gets or sets the order subtotal
         /// </summary>
-        public decimal OrderSubtotal { get; set; }
+        public decimal Subtotal { get; set; }
 
         /// <summary>
         /// Gets or sets the order discount (applied to order total)
         /// </summary>
-        public decimal OrderDiscount { get; set; }
+        public decimal Discount { get; set; }
 
         /// <summary>
         /// Gets or sets the order total
         /// </summary>
-        public decimal OrderTotal { get; set; }
+        public decimal Total { get; set; }
+
+        public OrderStatus Status { get; set; }
 
         public DateTimeOffset CreatedOn { get; set; }
 

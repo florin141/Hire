@@ -52,6 +52,11 @@ namespace Hire.Core.Domain.Orders
         public decimal TaxRate { get; set; }
 
         /// <summary>
+        /// Gets or sets the status
+        /// </summary>
+        public OrderItemStatus ItemStatus { get; set; }
+
+        /// <summary>
         /// Gets the order
         /// </summary>
         public virtual OrderEntity Order { get; set; }

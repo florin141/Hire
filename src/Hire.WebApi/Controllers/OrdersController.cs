@@ -1,46 +1,70 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Linq;
 using System.Threading.Tasks;
-using Hire.Core.Extensions;
 using Hire.Services.Models;
 using Hire.Services.Orders;
-using Hire.Services.Rentals;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 
 namespace Hire.WebApi.Controllers
 {
-    /// <summary>
-    /// CRUD 
-    /// </summary>
     [ApiController]
     [Route("[controller]")]
     [ApiVersion("1.0")]
     public class OrdersController : ControllerBase
     {
         private readonly IOrderService _orderService;
-        private readonly IVehicleService _vehicleService;
+        private readonly PagingOptions _defaultPagingOptions;
 
         public OrdersController(
-            IOrderService orderService, IVehicleService vehicleService)
+            IOrderService orderService,
+            IOptions<PagingOptions> pagingOptions)
         {
             _orderService = orderService;
-            _vehicleService = vehicleService;
+            _defaultPagingOptions = pagingOptions.Value;
         }
 
         [HttpGet(Name = nameof(GetAllOrders))]
         [ProducesResponseType(200)]
-        public async Task<ActionResult<Collection<Order>>> GetAllOrders()
+        public async Task<ActionResult<Collection<Order>>> GetAllOrders([FromQuery] PagingOptions pagingOptions)
         {
-            var userId = 1;
+            pagingOptions.Offset = pagingOptions.Offset ?? _defaultPagingOptions.Offset;
+            pagingOptions.Limit = pagingOptions.Limit ?? _defaultPagingOptions.Limit;
 
-            var orders = await _orderService.GetOrdersAsync(userId);
-            return Ok(orders);
+            var orders = await _orderService.GetAllOrdersAsync(pagingOptions);
+
+            var collection = PagedCollection<Order>.Create(
+                Link.ToCollection(nameof(GetAllOrdersByUserId)),
+                orders.Items.ToArray(),
+                orders.TotalSize,
+                pagingOptions);
+
+            return Ok(collection);
         }
 
-        [HttpGet(Name = nameof(GetOrderById))]
+        [Route("{userId}/all", Name = nameof(GetAllOrdersByUserId))]
         [ProducesResponseType(200)]
-        [Route("{orderId}")]
-        public async Task<ActionResult> GetOrderById([FromRoute] int orderId)
+        public async Task<ActionResult<Order>> GetAllOrdersByUserId(
+            int userId, 
+            [FromQuery] PagingOptions pagingOptions)
+        {
+            pagingOptions.Offset = pagingOptions.Offset ?? _defaultPagingOptions.Offset;
+            pagingOptions.Limit = pagingOptions.Limit ?? _defaultPagingOptions.Limit;
+
+            var orders = await _orderService.GetOrdersAsync(userId, pagingOptions);
+
+            var collection = PagedCollection<Order>.Create(
+                Link.ToCollection(nameof(GetAllOrdersByUserId)),
+                orders.Items.ToArray(),
+                orders.TotalSize,
+                pagingOptions);
+
+            return Ok(collection);
+        }
+
+        [Route("{orderId}", Name = nameof(GetOrderById))]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(404)]
+        public async Task<ActionResult<Order>> GetOrderById(int orderId)
         {
             var order = await _orderService.GetOrderByIdAsync(orderId);
             if (order == null)
@@ -62,54 +86,23 @@ namespace Hire.WebApi.Controllers
             return Created(Url.Link(nameof(OrdersController.GetOrderById), new { orderId }), null);
         }
 
-        [HttpPost("{orderId}/{rentalId}/lease", Name = nameof(RentVehicle))]
+        [HttpPost("{orderId}/complete", Name = nameof(CompleteOrder))]
         [ProducesResponseType(200)]
         [ProducesResponseType(201)]
         [ProducesResponseType(404)]
-        public async Task<ActionResult> RentVehicle(int orderId,int rentalId, [FromBody] RentVehicleForm rentForm)
+        public async Task<ActionResult> CompleteOrder(int orderId)
         {
             var order = await _orderService.GetOrderByIdAsync(orderId);
             if (order == null)
             {
                 return NotFound();
             }
-
-            var vehicle = await _vehicleService.GetVehicleEntityByIdAsync(rentalId);
-            if (vehicle == null)
+            if (order.Status == "COMPLETE" || order.Status == "CANCELLED")
             {
-                return NotFound();
+                return NoContent();
             }
 
-            var now = DateTimeOffset.Now;
-
-            await _orderService.LeaseAsync(
-                orderId, 
-                rentalId, 
-                rentForm.StartAt.GetValueOrDefault(now.StartOfDay()),
-                rentForm.EndAt.GetValueOrDefault(now.EndOfDay()));
-
-            return Created(Url.Link(nameof(OrdersController.GetOrderById), new { orderId }), null);
-        }
-
-        [HttpPost("{orderId}/{rentalId}/release", Name = nameof(ReturnVehicle))]
-        [ProducesResponseType(200)]
-        [ProducesResponseType(201)]
-        [ProducesResponseType(404)]
-        public async Task<ActionResult> ReturnVehicle(int orderId, int rentalId, [FromBody] ReleaseVehicleForm releaseForm)
-        {
-            var order = await _orderService.GetOrderByIdAsync(orderId);
-            if (order == null)
-            {
-                return NotFound();
-            }
-
-            var vehicle = await _vehicleService.GetVehicleEntityByIdAsync(rentalId);
-            if (vehicle == null)
-            {
-                return NotFound();
-            }
-            
-            await _orderService.ReleaseAsync(orderId, rentalId);
+            await _orderService.CompleteOrderAsync(orderId);
 
             return Created(Url.Link(nameof(OrdersController.GetOrderById), new { orderId }), null);
         }

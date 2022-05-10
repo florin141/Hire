@@ -5,13 +5,15 @@ namespace Hire.Services.Models
 {
     public class Order : Resource
     {
-        [Sortable]
-        public DateTimeOffset Date { get; set; }
-
         public decimal Subtotal { get; set; }
 
         public decimal Discount { get; set; }
 
         public decimal OrderTotal { get; set; }
+
+        [Sortable]
+        public DateTimeOffset Date { get; set; }
+
+        public string Status { get; set; }
     }
 }

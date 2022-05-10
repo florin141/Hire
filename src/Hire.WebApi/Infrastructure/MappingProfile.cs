@@ -16,6 +16,10 @@ namespace Hire.WebApi.Infrastructure
 
             CreateMap<OrderEntity, Order>()
                 .ForMember(dest => dest.Date, opt => opt.MapFrom(src => src.CreatedOn))
+                .ForMember(dest => dest.Subtotal, opt => opt.MapFrom(src => src.Subtotal))
+                .ForMember(dest => dest.Discount, opt => opt.MapFrom(src => src.Discount))
+                .ForMember(dest => dest.OrderTotal, opt => opt.MapFrom(src => src.Total))
+                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString().ToUpperInvariant()))
                 .ForMember(dest => dest.Self, opt => opt.MapFrom(src => Link.To(nameof(OrdersController.GetOrderById), new { orderId = src.Id })));
         }
     }

@@ -25,6 +25,7 @@ namespace Hire.Data
                 new VehicleEntity
                 {
                     Id = 1,
+                    Price = 50,
                     Vin = "JH4DC2380SS000011",
                     Odometer = 100100,
                     Make = "Chevrolet",
@@ -35,6 +36,7 @@ namespace Hire.Data
                 new VehicleEntity
                 {
                     Id = 2,
+                    Price = 80,
                     Vin = "JH4DC2380SS000012",
                     Odometer = 200200,
                     Make = "BMW",
@@ -45,6 +47,7 @@ namespace Hire.Data
                 new VehicleEntity
                 {
                     Id = 3,
+                    Price = 120,
                     Vin = "TS4DC2380SS000013",
                     Odometer = 90100,
                     Make = "Honda",
@@ -55,6 +58,7 @@ namespace Hire.Data
                 new VehicleEntity
                 {
                     Id = 4,
+                    Price = 130,
                     Vin = "TS4DC2380SS000013",
                     Odometer = 90200,
                     Make = "Chrysler",
@@ -65,6 +69,7 @@ namespace Hire.Data
                 new VehicleEntity
                 {
                     Id = 5,
+                    Price = 130,
                     Vin = "JH4DC2380SS000014",
                     Odometer = 200100,
                     Make = "Chevrolet",
@@ -75,6 +80,7 @@ namespace Hire.Data
                 new VehicleEntity
                 {
                     Id = 6,
+                    Price = 150,
                     Vin = "FD4DC2380SS000015",
                     Odometer = 200100,
                     Make = "Ford",
